@@ -219,7 +219,7 @@ export default class AsciiMathParser {
             {"asciimath":"prod","tex":"\\prod"},
             {"asciimath":"sum","tex":"\\sum"},
         ];
-        
+
         this.left_brackets = [
             {asciimath: 'langle', tex: '\\langle'},
             {asciimath: '(:', tex: '\\langle'},
@@ -243,7 +243,7 @@ export default class AsciiMathParser {
         this.leftright_brackets = [
             {asciimath: '|', left_tex: '\\lvert', right_tex: '\\rvert', free_tex: '|'},
         ];
-        
+
         this.unary_symbols = [
             {asciimath: "sqrt", tex: "\\sqrt"},
             {asciimath: "f", tex:"f", func:true},
@@ -316,7 +316,7 @@ export default class AsciiMathParser {
             {asciimath:"fr", atname:"mathvariant", atval:"fraktur", tex:"\\mathfrak"},
             {asciimath: "mathfrak", atname:"mathvariant", atval:"fraktur", tex:"\\mathfrak"},
         ];
-        
+
         this.binary_symbols = [
             {asciimath: "root", tex:"\\sqrt", option: true},
             {asciimath: "frac",    tex:"\\frac"},
@@ -325,9 +325,9 @@ export default class AsciiMathParser {
             {asciimath: "underset", tex:"\\underset"},
             {asciimath:"color", tex: "\\color", rawfirst: true},
         ]
-        
+
         this.non_constant_symbols = ['_','^','/'];
-        
+
     }
 
     sort_symbols() {
@@ -339,12 +339,12 @@ export default class AsciiMathParser {
         this.unary_symbols.sort(by_asciimath);
         this.binary_symbols.sort(by_asciimath);
     }
-    
+
     error(message, pos) {
         const neighbourhood = this.source(pos).slice(0,5);
         throw(new Error(`Error at character ${pos} near "${neighbourhood}": ${message}`));
     }
-    
+
     literal(token) {
         if(token) {
             return {tex: token.token, pos: token.pos, end: token.end, ttype: 'literal'};
@@ -367,12 +367,12 @@ export default class AsciiMathParser {
             .replace(/\}/g,'\\}')
         ;
     }
-    
+
     input(str) {
         this._source = str;
         this.brackets = [];
     }
-    
+
     source(pos = 0,end) {
         if(arguments.length>1) {
             return this._source.slice(pos,end);
@@ -380,7 +380,7 @@ export default class AsciiMathParser {
             return this._source.slice(pos);
         }
     }
-    
+
     eof(pos = 0) {
         pos = this.strip_space(pos);
         return pos == this._source.length;
@@ -410,7 +410,7 @@ export default class AsciiMathParser {
             return {tex: middle, pos: tok.pos, end: tok.end, middle_asciimath: this.source(pos,end)};
         }
     }
-    
+
     parse(str) {
         this.input(str);
         const result = this.consume();
@@ -453,13 +453,13 @@ export default class AsciiMathParser {
         }
         return {tex: tex, exprs: exprs};
     }
-    
+
     strip_space(pos = 0) {
         const osource = this.source(pos);
         const reduced = osource.replace(/^(\s|\\(?!\\))*/,'');
         return pos + osource.length - reduced.length;
     }
-    
+
     /* Does the given regex match next?
      */
     match(re, pos) {
@@ -470,7 +470,7 @@ export default class AsciiMathParser {
             return {token: token, pos: pos, match: m, end: pos+token.length, ttype: 'regex'};
         }
     }
-    
+
     /* Does the exact given string occur next?
      */
     exact(str, pos) {
@@ -505,7 +505,7 @@ export default class AsciiMathParser {
         }
         return {tex: tex, pos: pos, end: end, exprs: exprs, ttype: 'expression_list'};
     }
-    
+
     // E ::= IE | I/I                       Expression
     expression(pos = 0) {
         const negative = this.negative_expression(pos);
@@ -544,7 +544,7 @@ export default class AsciiMathParser {
             }
         }
     }
-    
+
     intermediate_or_fraction(pos = 0) {
         const first = this.intermediate(pos);
         if(!first) {
@@ -565,7 +565,7 @@ export default class AsciiMathParser {
             return first;
         }
     }
-    
+
     // I ::= S_S | S^S | S_S^S | S          Intermediate expression
     intermediate(pos = 0) {
         const first = this.simple(pos);
@@ -628,7 +628,7 @@ export default class AsciiMathParser {
         }
     }
 
-    // matrix: leftbracket "(" expr ")" ("," "(" expr ")")* rightbracket 
+    // matrix: leftbracket "(" expr ")" ("," "(" expr ")")* rightbracket
     // each row must have the same number of elements
     matrix(pos = 0) {
         let left = this.left_bracket(pos);
@@ -747,7 +747,7 @@ export default class AsciiMathParser {
         }
         return this.expression(pos);
     }
-    
+
     bracketed_expression(pos = 0) {
         const l = this.left_bracket(pos);
         if(l) {
@@ -784,7 +784,7 @@ export default class AsciiMathParser {
             }
         }
     }
-    
+
     // r ::= ) | ] | } | :) | :} | other right brackets
     right_bracket(pos = 0) {
         for(let bracket of this.right_brackets) {
@@ -794,7 +794,7 @@ export default class AsciiMathParser {
             }
         }
     }
-    
+
     // l ::= ( | [ | { | (: | {: | other left brackets
     left_bracket(pos = 0) {
         for(let bracket of this.left_brackets) {
@@ -885,11 +885,11 @@ export default class AsciiMathParser {
         }
         return this.longest([this.other_constant(pos), this.greek(pos), this.name(pos), this.number(pos), this.arbitrary_constant(pos)]);
     }
-    
+
     name(pos = 0) {
         return this.literal(this.match(/^[A-Za-z]/, pos));
     }
-    
+
     greek(pos = 0) {
         const re_greek = new RegExp('^('+this.greek_letters.join('|')+')');
         const m = this.match(re_greek, pos);
@@ -897,7 +897,7 @@ export default class AsciiMathParser {
             return {tex: '\\'+m.token, pos: pos, end: m.end, ttype: 'greek'};
         }
     }
-    
+
     number(pos = 0) {
         const re_number = new RegExp('^\\d+('+this.decimalsign+'\\d+)?');
         return this.literal(this.match(re_number, pos));
@@ -911,7 +911,7 @@ export default class AsciiMathParser {
             }
         }
     }
-    
+
     arbitrary_constant(pos = 0) {
         if(!this.eof(pos)) {
             if(this.exact(",",pos)) {
@@ -928,4 +928,3 @@ export default class AsciiMathParser {
         }
     }
 }
-
