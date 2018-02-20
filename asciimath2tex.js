@@ -390,7 +390,7 @@ export default class AsciiMathParser {
         if(!tok) {
             return;
         }
-        if(!tok.bracket) {
+        if (!this._options.unbracket || !tok.bracket) {
             return tok;
         }
 
@@ -411,8 +411,9 @@ export default class AsciiMathParser {
         }
     }
 
-    parse(str) {
+    parse(str, options = {unbracket: true}) {
         this.input(str);
+        this._options = options;
         const result = this.consume();
         return result.tex;
     }
